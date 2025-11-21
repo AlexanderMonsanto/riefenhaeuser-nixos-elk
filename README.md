@@ -6,6 +6,8 @@
 
 > **Produktionsreife Monitoring-Lösung für global verteilte Industrie 4.0-Systeme, die ExtrusionOS- und Spectre-Anwendungen auf NixOS-Infrastruktur ausführen.**
 
+![Industrial Monitoring Dashboard](docs/assets/hero.png)
+
 ## 📑 Management Summary (Lösungskonzept)
 
 Diese Lösung bietet ein zentralisiertes, sicheres und skalierbares Monitoring-Konzept für die weltweit verteilten Reifenhäuser-Systeme. Durch den Einsatz von **NixOS** wird eine reproduzierbare und gehärtete Infrastruktur gewährleistet ("Infrastructure as Code"). Der **ELK-Stack** (Elasticsearch, Logstash, Kibana) ermöglicht eine tiefgehende Analyse von Anwendungslogs, während **Prometheus & Grafana** Echtzeit-Metriken und Alarmierung bereitstellen.
