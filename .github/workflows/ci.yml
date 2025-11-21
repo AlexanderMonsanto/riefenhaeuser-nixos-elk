@@ -109,10 +109,8 @@ jobs:
           args: check config config/prometheus/prometheus.yml
       
       - name: Validate Prometheus rules
-        uses: docker://prom/prometheus:latest
-        with:
-          entrypoint: promtool
-          args: check rules config/prometheus/rules/*.yml
+        run: |
+          docker run --rm -v $(pwd):/workspace -w /workspace prom/prometheus:latest promtool check rules config/prometheus/rules/*.yml
 
   # ============================================================================
   # Build & Test
