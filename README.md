@@ -21,6 +21,7 @@ Diese Lösung bietet ein zentralisiertes, sicheres und skalierbares Monitoring-K
 ## 📋 Inhaltsverzeichnis
 
 - [Überblick](#überblick)
+- [Deployment-Optionen](#deployment-optionen)
 - [Architektur](#architektur)
 - [Technologie-Stack & Begründung](#technologie-stack--begründung)
 - [Sicherheitsfunktionen](#sicherheitsfunktionen)
@@ -45,6 +46,82 @@ Dieser Monitoring-Stack adressiert die Herausforderung, verteilte industrielle S
 ### Problemstellung
 
 Die manuelle Überwachung von ExtrusionOS/Spectre-Systemen über mehrere Kundenstandorte hinweg wird mit zunehmender Skalierung der Infrastruktur untragbar. Diese Lösung bietet zentrale Sichtbarkeit bei gleichzeitiger Einhaltung der Sicherheits- und Compliance-Anforderungen für industrielle Umgebungen.
+
+---
+
+## 🚀 Deployment-Optionen
+
+Dieses Projekt unterstützt **zwei Deployment-Strategien** für maximale Flexibilität:
+
+### 🐳 Docker Compose (Empfohlen für Entwicklung/Einzelserver)
+
+**Vorteile:**
+- ✅ Einfaches Setup (< 5 Minuten)
+- ✅ Minimaler Ressourcenverbrauch
+- ✅ Ideal für Entwicklung und Testing
+- ✅ Perfekt für Einzelserver-Deployments
+
+**Schnellstart:**
+```bash
+docker compose up -d
+```
+
+**Wann nutzen:**
+- Lokale Entwicklung
+- CI/CD Testing
+- Einzelserver-Produktionsumgebungen
+- Proof of Concepts
+
+---
+
+### ☸️ Kubernetes/K3s (Empfohlen für Produktion/Multi-Site)
+
+**Vorteile:**
+- ✅ High Availability (Multi-Replica)
+- ✅ Auto-Scaling
+- ✅ Rolling Updates (Zero Downtime)
+- ✅ Self-Healing
+- ✅ Multi-Node Support
+- ✅ Production-Grade Features
+
+**Schnellstart:**
+```bash
+# Mit Kustomize
+kubectl apply -k k8s/
+
+# Oder auf NixOS mit K3s
+nixos-rebuild switch --flake .#server
+```
+
+**Wann nutzen:**
+- Produktionsumgebungen
+- Multi-Site Deployments
+- High-Availability Anforderungen
+- Cloud-Native Infrastruktur
+- Edge/Industrial Deployments (K3s)
+
+---
+
+### 📊 Vergleich
+
+| Feature | Docker Compose | Kubernetes/K3s |
+|---------|----------------|----------------|
+| **Setup-Zeit** | 5 Minuten | 30 Minuten |
+| **Komplexität** | Niedrig | Mittel |
+| **High Availability** | ❌ Nein | ✅ Ja |
+| **Auto-Scaling** | ❌ Nein | ✅ Ja |
+| **Rolling Updates** | ❌ Nein | ✅ Ja |
+| **Multi-Node** | ❌ Nein | ✅ Ja |
+| **Ressourcen (Min)** | 2 CPU, 4GB RAM | 2 CPU, 5GB RAM |
+| **Best For** | Dev/Test/Single | Production/Multi-Site |
+
+> [!NOTE]
+> **Beide Deployment-Methoden nutzen dieselben Container-Images und Konfigurationsdateien.**
+> Sie können mit Docker Compose beginnen und später zu Kubernetes migrieren, ohne Ihre Konfiguration neu schreiben zu müssen.
+
+**Detaillierte Informationen:**
+- [Kubernetes Deployment Guide](k8s/README.md)
+- [Deployment Strategy Documentation](docs/deployment-strategy.md)
 
 ---
 

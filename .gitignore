@@ -337,4 +337,5 @@ personal/
 
 # Configuration templates
 !config/**/*.example.*
-!config/**/*.template.*.
+!config/**/*.template.*.# Kubernetes local secrets
+k8s/secrets/secrets-local.yaml

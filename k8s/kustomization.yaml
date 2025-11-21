@@ -1,0 +1,43 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: monitoring
+
+resources:
+  - namespace.yaml
+  - secrets/secrets.yaml
+  - configmaps/elasticsearch-config.yaml
+  - configmaps/kibana-config.yaml
+  - configmaps/logstash-config.yaml
+  - configmaps/prometheus-config.yaml
+  - configmaps/grafana-datasources.yaml
+  - configmaps/alertmanager-config.yaml
+  - pvcs/storage.yaml
+  - deployments/elasticsearch.yaml
+  - deployments/kibana.yaml
+  - deployments/logstash.yaml
+  - deployments/prometheus.yaml
+  - deployments/grafana.yaml
+  - deployments/alertmanager.yaml
+  - deployments/node-exporter.yaml
+  - services/services.yaml
+
+commonLabels:
+  project: industrial-monitoring
+  managed-by: kustomize
+
+images:
+  - name: docker.elastic.co/elasticsearch/elasticsearch
+    newTag: "8.11.1"
+  - name: docker.elastic.co/kibana/kibana
+    newTag: "8.11.1"
+  - name: docker.elastic.co/logstash/logstash
+    newTag: "8.11.1"
+  - name: prom/prometheus
+    newTag: "v2.48.0"
+  - name: grafana/grafana
+    newTag: "10.2.2"
+  - name: prom/alertmanager
+    newTag: "v0.26.0"
+  - name: prom/node-exporter
+    newTag: "v1.7.0"

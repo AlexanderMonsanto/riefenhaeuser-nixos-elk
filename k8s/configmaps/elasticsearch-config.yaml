@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: elasticsearch-config
+  namespace: monitoring
+data:
+  elasticsearch.yml: |
+    cluster.name: "docker-cluster"
+    network.host: 0.0.0.0
+    
+    # Security settings
+    xpack.security.enabled: true
+    xpack.security.authc.api_key.enabled: true
+    xpack.security.http.ssl.enabled: false
+    xpack.monitoring.collection.enabled: true
+    
+    # Discovery settings
+    discovery.type: single-node
