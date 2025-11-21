@@ -30,7 +30,15 @@ KIBANA_SECURITY_KEY=$(openssl rand -base64 32)
 KIBANA_REPORTING_KEY=$(openssl rand -base64 32)
 
 # Create secrets file
-cat <<EOF > k8s/secrets/secrets.yaml
+# Resolve project root (assuming script is in scripts/ directory)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+SECRETS_DIR="$PROJECT_ROOT/k8s/secrets"
+
+mkdir -p "$SECRETS_DIR"
+
+# Create secrets file
+cat <<EOF > "$SECRETS_DIR/secrets.yaml"
 apiVersion: v1
 kind: Secret
 metadata:

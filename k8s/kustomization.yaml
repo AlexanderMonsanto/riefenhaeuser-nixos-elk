@@ -46,3 +46,11 @@ images:
     newTag: "v0.26.0"
   - name: prom/node-exporter
     newTag: "v1.7.0"
+
+configMapGenerator:
+  - name: grafana-dashboards
+    files:
+      - configmaps/dashboards/dashboard.yml
+      - configmaps/dashboards/system-overview.json
+      - configmaps/dashboards/application-health.json
+      - configmaps/dashboards/security-audit.json

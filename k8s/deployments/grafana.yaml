@@ -37,9 +37,9 @@ spec:
         - name: GF_USERS_ALLOW_SIGN_UP
           value: "false"
         - name: GF_SERVER_ROOT_URL
-          value: "https://monitoring.example.com:3000"
+          value: "%(protocol)s://%(domain)s:%(http_port)s/"
         - name: GF_SECURITY_COOKIE_SECURE
-          value: "true"
+          value: "false"
         - name: GF_SECURITY_COOKIE_SAMESITE
           value: "lax"
         - name: GF_AUTH_ANONYMOUS_ENABLED
@@ -56,6 +56,8 @@ spec:
           mountPath: /var/lib/grafana
         - name: datasources
           mountPath: /etc/grafana/provisioning/datasources
+        - name: dashboards
+          mountPath: /etc/grafana/provisioning/dashboards
         livenessProbe:
           httpGet:
             path: /api/health
@@ -77,3 +79,6 @@ spec:
       - name: datasources
         configMap:
           name: grafana-datasources
+      - name: dashboards
+        configMap:
+          name: grafana-dashboards
