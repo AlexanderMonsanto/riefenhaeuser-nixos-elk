@@ -110,7 +110,7 @@ jobs:
       
       - name: Validate Prometheus rules
         run: |
-          docker run --rm -v $(pwd):/workspace -w /workspace prom/prometheus:latest promtool check rules config/prometheus/rules/*.yml
+          docker run --rm --entrypoint /bin/promtool -v $(pwd):/workspace -w /workspace prom/prometheus:latest check rules config/prometheus/rules/*.yml
 
   # ============================================================================
   # Build & Test
