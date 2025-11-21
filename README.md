@@ -328,7 +328,7 @@ MIT Lizenz - siehe [LICENSE](LICENSE) für Details.
 
 ## 👥 Autoren
 
-- Alexander Monsanto - Riefenhäuser ELK Project - [YourGitHub](https://github.com/AlexanderMonsanto)
+- Alexander Monsanto - Riefenhäuser ELK Project - [MyGitHub](https://github.com/AlexanderMonsanto)
 
 ---
 

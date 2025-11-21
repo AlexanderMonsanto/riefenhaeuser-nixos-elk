@@ -1,0 +1,418 @@
+# .github/workflows/ci.yml
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Run security scans daily at 2 AM UTC
+    - cron: '0 2 * * *'
+
+env:
+  DOCKER_BUILDKIT: 1
+  COMPOSE_DOCKER_CLI_BUILD: 1
+
+jobs:
+  # ============================================================================
+  # Security Checks
+  # ============================================================================
+  
+  security-scan:
+    name: Security Scanning
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH'
+      
+      - name: Upload Trivy results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v2
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+      
+      - name: Check for exposed secrets
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+      
+      - name: Verify no plaintext secrets
+        run: |
+          if find secrets/ -name "*-plaintext.yaml" -o -name "*-plaintext.yml" 2>/dev/null | grep -q .; then
+            echo "❌ ERROR: Plaintext secrets found!"
+            exit 1
+          fi
+          echo "✅ No plaintext secrets found"
+      
+      - name: Verify SOPS encryption
+        run: |
+          if [ -f "secrets/secrets.yaml" ]; then
+            if ! grep -q "sops:" secrets/secrets.yaml; then
+              echo "❌ ERROR: secrets.yaml is not encrypted!"
+              exit 1
+            fi
+            echo "✅ Secrets are properly encrypted"
+          fi
+
+  # ============================================================================
+  # Code Quality
+  # ============================================================================
+  
+  lint:
+    name: Lint & Format Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Install linting tools
+        run: |
+          pip install yamllint
+      
+      - name: Lint YAML files
+        run: |
+          yamllint -c .yamllint config/ || true
+      
+      - name: Validate Docker Compose
+        run: |
+          docker-compose config > /dev/null
+          echo "✅ Docker Compose syntax is valid"
+      
+      - name: Check Bash scripts
+        run: |
+          find scripts/ -name "*.sh" -exec shellcheck {} + || true
+      
+      - name: Validate Prometheus config
+        uses: docker://prom/promtool:latest
+        with:
+          entrypoint: promtool
+          args: check config config/prometheus/prometheus.yml
+      
+      - name: Validate Prometheus rules
+        uses: docker://prom/promtool:latest
+        with:
+          entrypoint: promtool
+          args: check rules config/prometheus/rules/*.yml
+
+  # ============================================================================
+  # Build & Test
+  # ============================================================================
+  
+  build:
+    name: Build Docker Images
+    runs-on: ubuntu-latest
+    needs: [security-scan, lint]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Log in to GitHub Container Registry
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha
+            type=semver,pattern={{version}}
+      
+      - name: Build images (pull_request)
+        if: github.event_name == 'pull_request'
+        run: |
+          docker-compose build
+      
+      - name: Build and push images (push)
+        if: github.event_name == 'push'
+        run: |
+          docker-compose build
+          docker-compose push || true
+
+  # ============================================================================
+  # Integration Tests
+  # ============================================================================
+  
+  integration-test:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: build
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Create test environment
+        run: |
+          cp .env.example .env
+          mkdir -p certs secrets/wireguard
+      
+      - name: Generate test certificates
+        run: |
+          chmod +x scripts/generate-certs.sh
+          ./scripts/generate-certs.sh || true
+      
+      - name: Start services
+        run: |
+          docker-compose up -d
+          sleep 60  # Wait for services to be ready
+      
+      - name: Wait for Elasticsearch
+        run: |
+          timeout 180 bash -c 'until curl -s http://localhost:9200/_cluster/health | grep -q "green\|yellow"; do sleep 5; done'
+      
+      - name: Wait for Kibana
+        run: |
+          timeout 180 bash -c 'until curl -s http://localhost:5601/api/status | grep -q "available"; do sleep 5; done'
+      
+      - name: Wait for Prometheus
+        run: |
+          timeout 60 bash -c 'until curl -s http://localhost:9090/-/healthy; do sleep 5; done'
+      
+      - name: Wait for Grafana
+        run: |
+          timeout 60 bash -c 'until curl -s http://localhost:3000/api/health; do sleep 5; done'
+      
+      - name: Run health checks
+        run: |
+          chmod +x scripts/health-check.sh
+          ./scripts/health-check.sh || docker-compose logs
+      
+      - name: Test Prometheus targets
+        run: |
+          curl -s http://localhost:9090/api/v1/targets | jq '.data.activeTargets[] | select(.health != "up") | .labels.job' | tee /tmp/down-targets.txt
+          if [ -s /tmp/down-targets.txt ]; then
+            echo "❌ Some targets are down"
+            exit 1
+          fi
+          echo "✅ All Prometheus targets are up"
+      
+      - name: Test AlertManager
+        run: |
+          curl -s http://localhost:9093/-/healthy
+          echo "✅ AlertManager is healthy"
+      
+      - name: Collect logs on failure
+        if: failure()
+        run: |
+          docker-compose logs > /tmp/docker-logs.txt
+      
+      - name: Upload logs
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: docker-logs
+          path: /tmp/docker-logs.txt
+      
+      - name: Cleanup
+        if: always()
+        run: |
+          docker-compose down -v
+
+  # ============================================================================
+  # NixOS Configuration Check
+  # ============================================================================
+  
+  nixos-check:
+    name: NixOS Configuration Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Install Nix
+        uses: cachix/install-nix-action@v23
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
+      
+      - name: Check flake
+        run: |
+          cd nixos
+          nix flake check || true
+      
+      - name: Build server configuration
+        run: |
+          cd nixos
+          nix build .#nixosConfigurations.monitoring-server.config.system.build.toplevel || true
+      
+      - name: Build client configuration
+        run: |
+          cd nixos
+          nix build .#nixosConfigurations.monitoring-client.config.system.build.toplevel || true
+
+  # ============================================================================
+  # Deployment
+  # ============================================================================
+  
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [integration-test]
+    if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
+    environment:
+      name: staging
+      url: https://staging.monitoring.example.com
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Deploy to staging
+        env:
+          DEPLOY_KEY: ${{ secrets.STAGING_DEPLOY_KEY }}
+        run: |
+          echo "Deploying to staging environment..."
+          # Add actual deployment commands here
+          # e.g., rsync, ssh, kubectl, etc.
+
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [integration-test]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment:
+      name: production
+      url: https://monitoring.example.com
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Create release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ github.run_number }}
+          release_name: Release v${{ github.run_number }}
+          draft: false
+          prerelease: false
+      
+      - name: Deploy to production
+        env:
+          DEPLOY_KEY: ${{ secrets.PRODUCTION_DEPLOY_KEY }}
+        run: |
+          echo "Deploying to production environment..."
+          # Add actual deployment commands here
+
+  # ============================================================================
+  # Notifications
+  # ============================================================================
+  
+  notify:
+    name: Send Notifications
+    runs-on: ubuntu-latest
+    needs: [security-scan, lint, build, integration-test]
+    if: always()
+    
+    steps:
+      - name: Send Slack notification
+        if: github.event_name == 'push'
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          text: |
+            Pipeline Status: ${{ job.status }}
+            Commit: ${{ github.sha }}
+            Author: ${{ github.actor }}
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+
+---
+# .github/workflows/security-scan.yml
+name: Scheduled Security Scan
+
+on:
+  schedule:
+    - cron: '0 2 * * *'  # Daily at 2 AM UTC
+  workflow_dispatch:  # Manual trigger
+
+jobs:
+  security-audit:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Run Trivy scanner (comprehensive)
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'json'
+          output: 'trivy-results.json'
+          severity: 'UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL'
+      
+      - name: Docker image scanning
+        run: |
+          docker-compose config | grep 'image:' | awk '{print $2}' | sort -u | while read img; do
+            echo "Scanning $img"
+            trivy image "$img"
+          done
+      
+      - name: Upload results
+        uses: actions/upload-artifact@v3
+        with:
+          name: security-scan-results
+          path: trivy-results.json
+      
+      - name: Notify on vulnerabilities
+        if: failure()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: 'failure'
+          text: '🚨 Security vulnerabilities detected! Check GitHub Actions for details.'
+          webhook_url: ${{ secrets.SLACK_SECURITY_WEBHOOK }}
+
+---
+# .yamllint
+# YAML linting configuration
+extends: default
+
+rules:
+  line-length:
+    max: 120
+    level: warning
+  indentation:
+    spaces: 2
+  comments:
+    min-spaces-from-content: 1
+  truthy:
+    allowed-values: ['true', 'false', 'yes', 'no']

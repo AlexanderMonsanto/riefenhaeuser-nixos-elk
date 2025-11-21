@@ -1,0 +1,124 @@
+# config/prometheus/prometheus.yml
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'industrial-monitoring'
+    environment: 'production'
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - alertmanager:9093
+      timeout: 10s
+
+# Load rules
+rule_files:
+  - '/etc/prometheus/rules/*.yml'
+
+# Scrape configurations
+scrape_configs:
+  # Prometheus itself
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+        labels:
+          service: 'prometheus'
+
+  # Elasticsearch
+  - job_name: 'elasticsearch'
+    static_configs:
+      - targets: ['elasticsearch:9200']
+        labels:
+          service: 'elasticsearch'
+    metrics_path: '/_prometheus/metrics'
+
+  # Kibana
+  - job_name: 'kibana'
+    static_configs:
+      - targets: ['kibana:5601']
+        labels:
+          service: 'kibana'
+
+  # Logstash
+  - job_name: 'logstash'
+    static_configs:
+      - targets: ['logstash:9600']
+        labels:
+          service: 'logstash'
+
+  # Grafana
+  - job_name: 'grafana'
+    static_configs:
+      - targets: ['grafana:3000']
+        labels:
+          service: 'grafana'
+
+  # AlertManager
+  - job_name: 'alertmanager'
+    static_configs:
+      - targets: ['alertmanager:9093']
+        labels:
+          service: 'alertmanager'
+
+  # Node Exporter (local)
+  - job_name: 'node-exporter-local'
+    static_configs:
+      - targets: ['node-exporter:9100']
+        labels:
+          instance: 'monitoring-server'
+          service: 'node-exporter'
+
+  # Client Sites (via WireGuard)
+  - job_name: 'client-sites'
+    static_configs:
+      - targets:
+          - '10.100.0.10:9100'
+          - '10.100.0.11:9100'
+          - '10.100.0.12:9100'
+        labels:
+          service: 'node-exporter'
+          environment: 'production'
+    
+    # Service discovery could be added here
+    relabel_configs:
+      - source_labels: [__address__]
+        regex: '10.100.0.10:.*'
+        target_label: site
+        replacement: 'site-01'
+      - source_labels: [__address__]
+        regex: '10.100.0.11:.*'
+        target_label: site
+        replacement: 'site-02'
+      - source_labels: [__address__]
+        regex: '10.100.0.12:.*'
+        target_label: site
+        replacement: 'site-03'
+
+  # Application-specific metrics (ExtrusionOS/Spectre)
+  - job_name: 'extrusionos'
+    static_configs:
+      - targets:
+          - '10.100.0.10:8080'
+          - '10.100.0.11:8080'
+          - '10.100.0.12:8080'
+        labels:
+          application: 'extrusionos'
+          environment: 'production'
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  - job_name: 'spectre'
+    static_configs:
+      - targets:
+          - '10.100.0.10:8081'
+          - '10.100.0.11:8081'
+          - '10.100.0.12:8081'
+        labels:
+          application: 'spectre'
+          environment: 'production'
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+

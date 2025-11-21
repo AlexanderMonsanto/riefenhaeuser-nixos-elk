@@ -1,12 +1,11 @@
-cluster.name: industrial-monitoring
-node.name: node-1
-path.data: /usr/share/elasticsearch/data
-path.logs: /usr/share/elasticsearch/logs
-
+cluster.name: "docker-cluster"
 network.host: 0.0.0.0
-http.port: 9200
 
-discovery.type: single-node
-
+# Security settings
 xpack.security.enabled: true
+xpack.security.authc.api_key.enabled: true
+xpack.security.http.ssl.enabled: false
 xpack.monitoring.collection.enabled: true
+
+# Discovery settings
+discovery.type: single-node
