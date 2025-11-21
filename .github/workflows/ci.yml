@@ -103,7 +103,7 @@ jobs:
           find scripts/ -name "*.sh" -exec shellcheck {} + || true
       
       - name: Validate Prometheus config
-        uses: docker://prom/promtool:latest
+        uses: docker://prom/prometheus:latest
         with:
           entrypoint: promtool
           args: check config config/prometheus/prometheus.yml

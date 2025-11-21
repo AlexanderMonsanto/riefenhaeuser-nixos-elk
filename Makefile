@@ -225,12 +225,12 @@ clean-logs: ## Remove old log files
 
 test-alerts: ## Test alert configuration
 	@echo "$(GREEN)Testing alert rules...$(NC)"
-	@docker run --rm -v $$(pwd)/config/prometheus/rules:/rules:ro prom/promtool check rules /rules/*.yml
+	@docker run --rm -v $$(pwd)/config/prometheus/rules:/rules:ro prom/prometheus check rules /rules/*.yml
 	@echo "$(GREEN)Alert rules validation complete.$(NC)"
 
 test-prometheus: ## Validate Prometheus configuration
 	@echo "$(GREEN)Validating Prometheus config...$(NC)"
-	@docker run --rm -v $$(pwd)/config/prometheus:/config:ro prom/promtool check config /config/prometheus.yml
+	@docker run --rm -v $$(pwd)/config/prometheus:/config:ro prom/prometheus check config /config/prometheus.yml
 	@echo "$(GREEN)Prometheus config is valid.$(NC)"
 
 test-connectivity: ## Test connectivity to all client sites
