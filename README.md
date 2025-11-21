@@ -1,49 +1,49 @@
-# 🏭 Industrial 4.0 Monitoring Stack (ExtrusionOS/Spectre)
+# 🏭 Industrie 4.0 Monitoring Stack (ExtrusionOS/Spectre)
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Lizenz: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![NixOS](https://img.shields.io/badge/NixOS-24.05-blue.svg)](https://nixos.org/)
 [![DevSecOps](https://img.shields.io/badge/DevSecOps-Ready-green.svg)](https://www.devsecops.org/)
 
-> **Production-ready monitoring solution for globally distributed Industrial 4.0 systems running ExtrusionOS and Spectre applications on NixOS infrastructure.**
+> **Produktionsreife Monitoring-Lösung für global verteilte Industrie 4.0-Systeme, die ExtrusionOS- und Spectre-Anwendungen auf NixOS-Infrastruktur ausführen.**
 
-## 📋 Table of Contents
+## 📋 Inhaltsverzeichnis
 
-- [Overview](#overview)
-- [Architecture](#architecture)
-- [Technology Stack & Rationale](#technology-stack--rationale)
-- [Security Features](#security-features)
-- [Quick Start](#quick-start)
-- [Configuration](#configuration)
-- [Monitoring Capabilities](#monitoring-capabilities)
-- [Limitations & Future Improvements](#limitations--future-improvements)
-
----
-
-## 🎯 Overview
-
-This monitoring stack addresses the challenge of managing distributed industrial systems deployed at customer sites worldwide. It provides:
-
-- ✅ Real-time health monitoring of hosts and in-house applications
-- ✅ Anomaly detection and alerting
-- ✅ Historical data analysis and statistics
-- ✅ Secure secret management
-- ✅ Zero-trust security model
-- ✅ Minimal operational overhead
-
-### Problem Statement
-
-Managing manual oversight of ExtrusionOS/Spectre systems across multiple customer sites becomes unsustainable as infrastructure scales. This solution provides centralized visibility while maintaining security and compliance requirements for industrial environments.
+- [Überblick](#überblick)
+- [Architektur](#architektur)
+- [Technologie-Stack & Begründung](#technologie-stack--begründung)
+- [Sicherheitsfunktionen](#sicherheitsfunktionen)
+- [Schnellstart](#schnellstart)
+- [Konfiguration](#konfiguration)
+- [Monitoring-Funktionen](#monitoring-funktionen)
+- [Einschränkungen & Zukünftige Verbesserungen](#einschränkungen--zukünftige-verbesserungen)
 
 ---
 
-## 🏗️ Architecture
+## 🎯 Überblick
+
+Dieser Monitoring-Stack adressiert die Herausforderung, verteilte industrielle Systeme zu verwalten, die an Kundenstandorten weltweit eingesetzt werden. Er bietet:
+
+- ✅ Echtzeit-Überwachung des Zustands von Hosts und internen Anwendungen
+- ✅ Anomalieerkennung und Alarmierung
+- ✅ Analyse historischer Daten und Statistiken
+- ✅ Sicheres Secret-Management
+- ✅ Zero-Trust-Sicherheitsmodell
+- ✅ Minimaler operativer Aufwand
+
+### Problemstellung
+
+Die manuelle Überwachung von ExtrusionOS/Spectre-Systemen über mehrere Kundenstandorte hinweg wird mit zunehmender Skalierung der Infrastruktur untragbar. Diese Lösung bietet zentrale Sichtbarkeit bei gleichzeitiger Einhaltung der Sicherheits- und Compliance-Anforderungen für industrielle Umgebungen.
+
+---
+
+## 🏗️ Architektur
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    Monitoring Server (Central)               │
+│                    Monitoring Server (Zentral)               │
 │  ┌────────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐ │
 │  │Elasticsearch│  │ Kibana   │  │Prometheus│  │ Grafana  │ │
-│  │   (Logs)   │  │(Dashboards)│ │ (Metrics)│  │(Analytics)│ │
+│  │   (Logs)   │  │(Dashboards)│ │ (Metriken)│  │(Analytics)│ │
 │  └────────────┘  └──────────┘  └──────────┘  └──────────┘ │
 │         │              │               │             │       │
 │  ┌────────────────────────────────────────────────────────┐│
@@ -54,7 +54,7 @@ Managing manual oversight of ExtrusionOS/Spectre systems across multiple custome
                 ┌───────────┴───────────┐
                 │                       │
         ┌───────▼────────┐      ┌──────▼────────┐
-        │   Client Site 1 │      │ Client Site N │
+        │   Kundenstandort 1 │      │ Kundenstandort N │
         │                 │      │               │
         │ ┌─────────────┐ │      │┌─────────────┐│
         │ │  Filebeat   │ │      ││  Filebeat   ││
@@ -62,7 +62,7 @@ Managing manual oversight of ExtrusionOS/Spectre systems across multiple custome
         │ └─────────────┘ │      │└─────────────┘│
         │ ┌─────────────┐ │      │┌─────────────┐│
         │ │Node Exporter│ │      ││Node Exporter││
-        │ │  (Metrics)  │ │      ││  (Metrics)  ││
+        │ │  (Metriken) │ │      ││  (Metriken) ││
         │ └─────────────┘ │      │└─────────────┘│
         │ ┌─────────────┐ │      │┌─────────────┐│
         │ │ExtrusionOS/ │ │      ││ExtrusionOS/ ││
@@ -73,142 +73,142 @@ Managing manual oversight of ExtrusionOS/Spectre systems across multiple custome
 
 ---
 
-## 🛠️ Technology Stack & Rationale
+## 🛠️ Technologie-Stack & Begründung
 
-### Core Components
+### Kernkomponenten
 
-| Component | Purpose | Rationale |
+| Komponente | Zweck | Begründung |
 |-----------|---------|-----------|
-| **Elasticsearch** | Log aggregation & search | Industry-standard for log management, powerful querying, scales horizontally |
-| **Kibana** | Log visualization | Native integration with Elasticsearch, rich dashboards, anomaly detection |
-| **Prometheus** | Metrics collection | Pull-based model ideal for dynamic environments, PromQL for complex queries |
-| **Grafana** | Metrics visualization | Superior visualization, alerting, supports multiple data sources |
-| **Filebeat** | Log shipping | Lightweight, reliable, backpressure handling |
-| **Node Exporter** | System metrics | Standard Prometheus exporter, comprehensive hardware/OS metrics |
-| **Nginx** | Reverse proxy | mTLS termination, load balancing, secure client authentication |
-| **WireGuard** | VPN connectivity | Modern, fast, secure tunneling for distributed sites |
-| **SOPS + age** | Secret management | Declarative encryption for NixOS, GitOps-friendly |
+| **Elasticsearch** | Log-Aggregation & Suche | Industriestandard für Log-Management, leistungsstarke Abfragen, horizontale Skalierung |
+| **Kibana** | Log-Visualisierung | Native Integration mit Elasticsearch, umfangreiche Dashboards, Anomalieerkennung |
+| **Prometheus** | Metrik-Erfassung | Pull-basiertes Modell ideal für dynamische Umgebungen, PromQL für komplexe Abfragen |
+| **Grafana** | Metrik-Visualisierung | Überlegene Visualisierung, Alarmierung, unterstützt mehrere Datenquellen |
+| **Filebeat** | Log-Versand | Leichtgewichtig, zuverlässig, Backpressure-Handling |
+| **Node Exporter** | System-Metriken | Standard Prometheus-Exporter, umfassende Hardware/OS-Metriken |
+| **Nginx** | Reverse Proxy | mTLS-Terminierung, Load Balancing, sichere Client-Authentifizierung |
+| **WireGuard** | VPN-Konnektivität | Modernes, schnelles, sicheres Tunneling für verteilte Standorte |
+| **SOPS + age** | Secret-Management | Deklarative Verschlüsselung für NixOS, GitOps-freundlich |
 
-### Why This Stack?
+### Warum dieser Stack?
 
-1. **ELK Stack**: Best-in-class for log analysis in industrial environments
-2. **Prometheus/Grafana**: Time-series metrics with powerful alerting
-3. **NixOS Integration**: Declarative configuration, reproducible builds
-4. **Security First**: mTLS, VPN, encrypted secrets, least privilege
-5. **Operational Simplicity**: Automated deployments, self-healing
+1. **ELK Stack**: Best-in-Class für Log-Analyse in industriellen Umgebungen
+2. **Prometheus/Grafana**: Zeitreihen-Metriken mit leistungsstarker Alarmierung
+3. **NixOS Integration**: Deklarative Konfiguration, reproduzierbare Builds
+4. **Security First**: mTLS, VPN, verschlüsselte Secrets, Least Privilege
+5. **Operative Einfachheit**: Automatisierte Deployments, Self-Healing
 
 ---
 
-## 🔒 Security Features
+## 🔒 Sicherheitsfunktionen
 
 ### Defense in Depth
 
-1. **Network Layer**
-   - WireGuard VPN for all client-server communication
-   - mTLS certificate authentication (no passwords)
-   - IP whitelisting per client site
+1. **Netzwerkschicht**
+   - WireGuard VPN für die gesamte Client-Server-Kommunikation
+   - mTLS-Zertifikatsauthentifizierung (keine Passwörter)
+   - IP-Whitelisting pro Kundenstandort
 
-2. **Application Layer**
-   - Nginx rate limiting and DDoS protection
-   - Read-only Filebeat configurations on clients
-   - Separate service accounts per component
+2. **Anwendungsschicht**
+   - Nginx Rate Limiting und DDoS-Schutz
+   - Read-only Filebeat-Konfigurationen auf Clients
+   - Separate Service-Accounts pro Komponente
 
-3. **Secret Management**
-   - SOPS encryption for all secrets
-   - Age key rotation support
-   - No plaintext credentials in Git
+3. **Secret-Management**
+   - SOPS-Verschlüsselung für alle Secrets
+   - Unterstützung für Age-Key-Rotation
+   - Keine Klartext-Zugangsdaten in Git
 
-4. **System Hardening**
-   - AppArmor profiles for all services
-   - Minimal container images (distroless where possible)
-   - Automated security updates via NixOS
+4. **Systemhärtung**
+   - AppArmor-Profile für alle Dienste
+   - Minimale Container-Images (Distroless wo möglich)
+   - Automatisierte Sicherheitsupdates via NixOS
 
 5. **Audit & Compliance**
-   - All access logged to Elasticsearch
-   - Immutable audit trail
-   - GDPR-compliant data retention policies
+   - Alle Zugriffe werden in Elasticsearch protokolliert
+   - Unveränderlicher Audit-Trail
+   - DSGVO-konforme Datenaufbewahrungsrichtlinien
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Schnellstart
 
-### Prerequisites
+### Voraussetzungen
 
-- NixOS 24.05+ (server and clients)
-- Docker & Docker Compose (for development)
-- `sops` and `age` for secret management
-- 4GB RAM minimum (server), 512MB (clients)
+- NixOS 24.05+ (Server und Clients)
+- Docker & Docker Compose (für Entwicklung)
+- `sops` und `age` für Secret-Management
+- 4GB RAM Minimum (Server), 512MB (Clients)
 
-### 1. Clone Repository
+### 1. Repository klonen
 
 ```bash
 git clone https://github.com/yourusername/industrial-monitoring-stack.git
 cd industrial-monitoring-stack
 ```
 
-### 2. Generate Secrets
+### 2. Secrets generieren
 
 ```bash
-# Generate age key for SOPS
+# Age-Key für SOPS generieren
 age-keygen -o secrets/age-key.txt
 
-# Generate certificates for mTLS
+# Zertifikate für mTLS generieren
 ./scripts/generate-certs.sh
 
-# Encrypt secrets
+# Secrets verschlüsseln
 sops -e -i secrets/secrets.yaml
 ```
 
-### 3. Deploy Monitoring Server
+### 3. Monitoring-Server bereitstellen
 
 ```bash
-# Using Docker Compose (development)
+# Mit Docker Compose (Entwicklung)
 docker-compose up -d
 
-# Using NixOS (production)
+# Mit NixOS (Produktion)
 sudo nixos-rebuild switch --flake .#monitoring-server
 ```
 
-### 4. Deploy Client Agents
+### 4. Client-Agenten bereitstellen
 
 ```bash
-# On client systems
+# Auf Client-Systemen
 sudo nixos-rebuild switch --flake .#monitoring-client
 ```
 
-### 5. Access Dashboards
+### 5. Zugriff auf Dashboards
 
 - **Kibana**: https://monitoring.example.com:5601
 - **Grafana**: https://monitoring.example.com:3000
 
-Default credentials are in `secrets/secrets.yaml` (encrypted).
+Standard-Zugangsdaten befinden sich in `secrets/secrets.yaml` (verschlüsselt).
 
 ---
 
-## ⚙️ Configuration
+## ⚙️ Konfiguration
 
-### Server Configuration
+### Server-Konfiguration
 
-The monitoring server is configured via `nixos/server/configuration.nix`:
+Der Monitoring-Server wird über `nixos/server/configuration.nix` konfiguriert:
 
 ```nix
-# Key configuration options
+# Wichtige Konfigurationsoptionen
 services.elasticsearch.enable = true;
 services.kibana.enable = true;
 services.prometheus.enable = true;
 services.grafana.enable = true;
 
-# Security hardening
+# Sicherheitshärtung
 security.apparmor.enable = true;
-networking.firewall.allowedTCPPorts = [ 443 ];  # Only HTTPS
+networking.firewall.allowedTCPPorts = [ 443 ];  # Nur HTTPS
 ```
 
-### Client Configuration
+### Client-Konfiguration
 
-Clients use `nixos/client/configuration.nix`:
+Clients verwenden `nixos/client/configuration.nix`:
 
 ```nix
-# Filebeat for log shipping
+# Filebeat für Log-Versand
 services.filebeat = {
   enable = true;
   settings = {
@@ -225,9 +225,9 @@ services.filebeat = {
 services.prometheus.exporters.node.enable = true;
 ```
 
-### Secret Management
+### Secret-Management
 
-Secrets are encrypted with SOPS:
+Secrets werden mit SOPS verschlüsselt:
 
 ```yaml
 # secrets/secrets.yaml
@@ -237,107 +237,107 @@ kibana_encryption_key: ENC[AES256_GCM,data:abc...]
 
 ---
 
-## 📊 Monitoring Capabilities
+## 📊 Monitoring-Funktionen
 
-### System Metrics (Prometheus)
+### System-Metriken (Prometheus)
 
-- CPU usage per core
-- Memory utilization and swap
-- Disk I/O and space
-- Network throughput
-- System load averages
+- CPU-Auslastung pro Kern
+- Speichernutzung und Swap
+- Festplatten-I/O und Speicherplatz
+- Netzwerkdurchsatz
+- System Load Averages
 
-### Application Logs (ELK)
+### Anwendungs-Logs (ELK)
 
-- ExtrusionOS process logs
-- Spectre application errors
-- System journal (systemd)
-- Audit logs
+- ExtrusionOS Prozess-Logs
+- Spectre Anwendungsfehler
+- System-Journal (systemd)
+- Audit-Logs
 
-### Alerting Rules
+### Alarmierungsregeln
 
-Pre-configured alerts for:
+Vorkonfigurierte Alarme für:
 
-- High CPU usage (>80% for 5 min)
-- Low disk space (<10%)
-- Service failures
-- Anomalous log patterns
-- Network connectivity issues
+- Hohe CPU-Auslastung (>80% für 5 Min)
+- Geringer Festplattenspeicher (<10%)
+- Dienstausfälle
+- Anomale Log-Muster
+- Netzwerkverbindungsprobleme
 
 ### Dashboards
 
-- **System Overview**: All hosts at a glance
-- **Application Health**: ExtrusionOS/Spectre status
-- **Network**: Bandwidth and latency
-- **Security**: Failed auth attempts, anomalies
+- **Systemübersicht**: Alle Hosts auf einen Blick
+- **Anwendungsstatus**: ExtrusionOS/Spectre Status
+- **Netzwerk**: Bandbreite und Latenz
+- **Sicherheit**: Fehlgeschlagene Anmeldeversuche, Anomalien
 
 ---
 
-## 🔍 Limitations & Future Improvements
+## 🔍 Einschränkungen & Zukünftige Verbesserungen
 
-### Current Limitations
+### Aktuelle Einschränkungen
 
-1. **Scalability**: Single monitoring server (SPOF)
-2. **Bandwidth**: Full log shipping may strain low-bandwidth sites
-3. **Storage**: No automated log rotation/archival
-4. **Alerting**: Basic rules, no ML-based anomaly detection
-5. **Multi-tenancy**: Not optimized for isolating client data
+1. **Skalierbarkeit**: Einzelner Monitoring-Server (SPOF)
+2. **Bandbreite**: Vollständiger Log-Versand kann Standorte mit geringer Bandbreite belasten
+3. **Speicher**: Keine automatisierte Log-Rotation/Archivierung
+4. **Alarmierung**: Basisregeln, keine ML-basierte Anomalieerkennung
+5. **Mandantenfähigkeit**: Nicht optimiert für die Isolierung von Kundendaten
 
 ### Roadmap
 
 #### Phase 1 (Q1 2026)
-- [ ] High-availability Elasticsearch cluster (3 nodes)
-- [ ] Log sampling for bandwidth-constrained sites
-- [ ] Automated index lifecycle management (ILM)
-- [ ] Machine learning anomaly detection (Elastic ML)
+- [ ] Hochverfügbares Elasticsearch-Cluster (3 Knoten)
+- [ ] Log-Sampling für bandbreitenbeschränkte Standorte
+- [ ] Automatisiertes Index Lifecycle Management (ILM)
+- [ ] Machine Learning Anomalieerkennung (Elastic ML)
 
 #### Phase 2 (Q2 2026)
-- [ ] Multi-tenancy with role-based access control (RBAC)
-- [ ] S3-compatible cold storage for historical logs
-- [ ] Custom ExtrusionOS/Spectre dashboards
-- [ ] Synthetic monitoring (uptime checks)
+- [ ] Mandantenfähigkeit mit rollenbasierter Zugriffskontrolle (RBAC)
+- [ ] S3-kompatibler Cold Storage für historische Logs
+- [ ] Benutzerdefinierte ExtrusionOS/Spectre Dashboards
+- [ ] Synthetisches Monitoring (Uptime Checks)
 
 #### Phase 3 (Q3 2026)
-- [ ] OpenTelemetry integration for distributed tracing
-- [ ] Predictive maintenance models
-- [ ] Mobile app for on-call alerts
-- [ ] Integration with ticketing systems (Jira, ServiceNow)
+- [ ] OpenTelemetry-Integration für Distributed Tracing
+- [ ] Predictive Maintenance Modelle
+- [ ] Mobile App für On-Call-Alarme
+- [ ] Integration mit Ticketing-Systemen (Jira, ServiceNow)
 
 ---
 
-## 📚 Documentation
+## 📚 Dokumentation
 
-- [Installation Guide](docs/installation.md)
-- [Security Hardening](docs/security.md)
-- [Troubleshooting](docs/troubleshooting.md)
-- [API Reference](docs/api.md)
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+- [Installationsanleitung](docs/installation.md)
+- [Sicherheitshärtung](docs/security.md)
+- [Fehlerbehebung](docs/troubleshooting.md)
+- [API-Referenz](docs/api.md)
 
 ---
 
-## 📄 License
+## 🤝 Mitwirken
 
-MIT License - see [LICENSE](LICENSE) for details.
-
----
-
-## 👥 Authors
-
-- Your Name - Initial work - [YourGitHub](https://github.com/AlexanderMonsanto)
+Beiträge sind willkommen! Bitte lesen Sie [CONTRIBUTING.md](CONTRIBUTING.md) für Richtlinien.
 
 ---
 
-## 🙏 Acknowledgments
+## 📄 Lizenz
 
-- Reifenhäuser Group for the industrial use case
-- NixOS community for declarative infrastructure
-- Elastic and Grafana Labs for excellent monitoring tools
+MIT Lizenz - siehe [LICENSE](LICENSE) für Details.
 
 ---
 
-**Built with ❤️ for Industrial 4.0**
+## 👥 Autoren
+
+- Ihr Name - Initiale Arbeit - [YourGitHub](https://github.com/AlexanderMonsanto)
+
+---
+
+## 🙏 Danksagung
+
+- Reifenhäuser Gruppe für den industriellen Anwendungsfall
+- NixOS Community für deklarative Infrastruktur
+- Elastic und Grafana Labs für exzellente Monitoring-Tools
+
+---
+
+**Entwickelt mit ❤️ für Industrie 4.0**
