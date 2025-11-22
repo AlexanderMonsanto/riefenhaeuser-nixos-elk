@@ -3,8 +3,8 @@ server.shutdownTimeout: "5s"
 
 # Elasticsearch connection
 elasticsearch.hosts: [ "http://elasticsearch:9200" ]
-elasticsearch.username: "kibana_system"
-elasticsearch.password: "${KIBANA_SYSTEM_PASSWORD}"
+elasticsearch.username: "${ELASTICSEARCH_USERNAME}"
+elasticsearch.password: "${ELASTICSEARCH_PASSWORD}"
 
 # Security and Encryption
 xpack.encryptedSavedObjects.encryptionKey: "${XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY}"
