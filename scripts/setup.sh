@@ -55,5 +55,49 @@ if [ ! -f certs/ca.key ]; then
     ./scripts/generate-certs.sh
 fi
 
+# Set up Elasticsearch built-in user passwords
+echo "Setting up Elasticsearch user passwords..."
+echo "Waiting for Elasticsearch to be ready..."
+
+# Start Elasticsearch if not running
+docker-compose up -d elasticsearch
+
+# Wait for Elasticsearch to be healthy
+MAX_WAIT=60
+ELAPSED=0
+while [ $ELAPSED -lt $MAX_WAIT ]; do
+    if docker-compose ps elasticsearch | grep -q "Up (healthy)"; then
+        echo "Elasticsearch is healthy"
+        break
+    fi
+    echo "Waiting for Elasticsearch... ($ELAPSED/$MAX_WAIT seconds)"
+    sleep 5
+    ELAPSED=$((ELAPSED + 5))
+done
+
+if [ $ELAPSED -ge $MAX_WAIT ]; then
+    echo "Warning: Elasticsearch did not become healthy in time. You may need to set passwords manually."
+else
+    # Load passwords from .env
+    source .env
+
+    # Set kibana_system password
+    echo "Setting kibana_system password..."
+    docker exec elasticsearch curl -s -X POST -u "elastic:${ELASTIC_PASSWORD}" \
+        -H "Content-Type: application/json" \
+        "http://localhost:9200/_security/user/kibana_system/_password" \
+        -d "{\"password\":\"${KIBANA_SYSTEM_PASSWORD}\"}" || echo "Warning: Failed to set kibana_system password"
+
+    # Set logstash_system password
+    echo "Setting logstash_system password..."
+    docker exec elasticsearch curl -s -X POST -u "elastic:${ELASTIC_PASSWORD}" \
+        -H "Content-Type: application/json" \
+        "http://localhost:9200/_security/user/logstash_system/_password" \
+        -d "{\"password\":\"${LOGSTASH_SYSTEM_PASSWORD}\"}" || echo "Warning: Failed to set logstash_system password"
+
+    echo "Elasticsearch user passwords configured successfully"
+fi
+
 echo -e "${GREEN}Setup complete!${NC}"
 echo "Please encrypt your secrets using SOPS and update .env file."
+echo "Run 'docker-compose up -d' to start all services."

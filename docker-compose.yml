@@ -137,6 +137,7 @@ services:
       - GF_SECURITY_COOKIE_SECURE=true
       - GF_SECURITY_COOKIE_SAMESITE=lax
       - GF_AUTH_ANONYMOUS_ENABLED=false
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
     volumes:
       - ./config/grafana/grafana.ini:/etc/grafana/grafana.ini:ro
       - ./config/grafana/datasources:/etc/grafana/provisioning/datasources:ro

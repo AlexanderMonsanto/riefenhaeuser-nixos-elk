@@ -14,13 +14,14 @@ datasources:
     type: elasticsearch
     access: proxy
     url: http://elasticsearch:9200
-    database: filebeat-*
+    database: "[logstash-]YYYY.MM.DD"
     jsonData:
       timeField: "@timestamp"
-      esVersion: "7.10.0"
+      esVersion: "8.0.0"
       logMessageField: message
       logLevelField: level
     basicAuth: true
     basicAuthUser: elastic
-    basicAuthPassword: changeme
+    secureJsonData:
+      basicAuthPassword: ${ELASTIC_PASSWORD}
     editable: true
