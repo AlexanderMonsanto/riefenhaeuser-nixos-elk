@@ -1,11 +1,11 @@
-# Installation Guide
+# Installationsanleitung
 
-## Prerequisites
+## Voraussetzungen
 
-Before you begin, ensure you have the following tools installed.
+Bevor Sie beginnen, stellen Sie sicher, dass die folgenden Tools installiert sind.
 
 ### 1. Docker & Docker Compose
-Required for running the stack in development mode.
+Erforderlich für das Ausführen des Stacks im Entwicklungsmodus.
 
 - **Ubuntu/Debian**:
   ```bash
@@ -15,39 +15,39 @@ Required for running the stack in development mode.
   newgrp docker
   ```
 - **NixOS**:
-  Add to your `configuration.nix`:
+  Fügen Sie dies zu Ihrer `configuration.nix` hinzu:
   ```nix
   virtualisation.docker.enable = true;
-  users.users.<your-user>.extraGroups = [ "docker" ];
+  users.users.<ihr-benutzer>.extraGroups = [ "docker" ];
   ```
-- **macOS**: Install [Docker Desktop](https://www.docker.com/products/docker-desktop/).
+- **macOS**: Installieren Sie [Docker Desktop](https://www.docker.com/products/docker-desktop/).
 
 ### 2. WireGuard
-Required for secure communication between nodes.
+Erforderlich für die sichere Kommunikation zwischen den Knoten.
 
 - **Ubuntu/Debian**:
   ```bash
   sudo apt install wireguard
   ```
 - **NixOS**:
-  Add to `configuration.nix`:
+  Fügen Sie dies zu Ihrer `configuration.nix` hinzu:
   ```nix
   networking.wireguard.enable = true;
   ```
-- **macOS**: Install via App Store or `brew install wireguard-tools`.
+- **macOS**: Installieren Sie es über den App Store oder `brew install wireguard-tools`.
 
 ### 3. SOPS & Age
-Required for secret management.
+Erforderlich für das Secret-Management.
 
 - **Linux (Binary)**:
   ```bash
-  # Install Age
+  # Age installieren
   curl -LO https://github.com/FiloSottile/age/releases/latest/download/age-v1.0.0-linux-amd64.tar.gz
   tar xf age-v1.0.0-linux-amd64.tar.gz
   sudo mv age/age /usr/local/bin/
   sudo mv age/age-keygen /usr/local/bin/
 
-  # Install SOPS
+  # SOPS installieren
   curl -LO https://github.com/getsops/sops/releases/latest/download/sops-v3.7.3.linux.amd64
   sudo mv sops-v3.7.3.linux.amd64 /usr/local/bin/sops
   sudo chmod +x /usr/local/bin/sops
@@ -61,9 +61,10 @@ Required for secret management.
   brew install sops age
   ```
 
-## Steps
-1. Clone the repository.
-2. Run `./scripts/setup.sh` to initialize secrets and certificates.
-3. Encrypt secrets using SOPS.
-4. Run `docker-compose up -d` to start the server stack.
-5. Deploy NixOS clients using the flake.
+## Schritte
+
+1. Repository klonen.
+2. Führen Sie `./scripts/setup.sh` aus, um Secrets und Zertifikate zu initialisieren.
+3. Verschlüsseln Sie die Secrets mit SOPS.
+4. Führen Sie `docker-compose up -d` aus, um den Server-Stack zu starten.
+5. Deployen Sie die NixOS-Clients unter Verwendung des Flakes.
