@@ -25,6 +25,22 @@ EOF
     echo "Secrets template created at secrets/secrets-plaintext.yaml"
 fi
 
+# Generate .env if not exists
+if [ ! -f .env ]; then
+    echo "Generating .env file..."
+    cat <<EOF > .env
+ELASTIC_PASSWORD=$(openssl rand -base64 16)
+KIBANA_SYSTEM_PASSWORD=$(openssl rand -base64 16)
+LOGSTASH_SYSTEM_PASSWORD=$(openssl rand -base64 16)
+GRAFANA_ADMIN_USER=admin
+GRAFANA_ADMIN_PASSWORD=$(openssl rand -base64 16)
+KIBANA_ENCRYPTION_KEY=$(openssl rand -base64 32)
+KIBANA_SECURITY_KEY=$(openssl rand -base64 32)
+KIBANA_REPORTING_KEY=$(openssl rand -base64 32)
+EOF
+    echo ".env file created with secure random passwords."
+fi
+
 # Generate WireGuard keys
 if [ ! -f secrets/wireguard/server-private.key ]; then
     echo "Generating WireGuard keys..."
