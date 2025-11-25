@@ -235,15 +235,21 @@ git clone https://github.com/AlexanderMonsanto/reifenhaeuser-nixos-elk.git
 cd reifenhaeuser-nixos-elk
 ```
 
-### 2. Secrets generieren
+### 2. Setup & Secrets generieren
+
+Führen Sie den automatisierten Setup-Befehl aus. Dieser generiert:
+- `.env` Datei mit sicheren Passwörtern
+- Age-Key für SOPS
+- mTLS Zertifikate
+- WireGuard Schlüssel
 
 ```bash
-# Age-Key für SOPS generieren
-age-keygen -o secrets/age-key.txt
+make setup
+```
 
-# Zertifikate für mTLS generieren
-./scripts/generate-certs.sh
+Anschließend verschlüsseln Sie die Secrets:
 
+```bash
 # Secrets verschlüsseln
 sops -e -i secrets/secrets.yaml
 ```
